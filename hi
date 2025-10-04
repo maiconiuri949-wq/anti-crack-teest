@@ -1,0 +1,22 @@
+local orig_loadstring = loadstring
+local debug_getinfo = debug and debug.getinfo
+
+local function is_hooked(fn)
+    local ok, info = pcall(function() return debug_getinfo and debug_getinfo(fn, "Sln") end)
+    if not ok then return true end
+    if not info then return true end
+    if info.what == "C" then return false end
+    local s = tostring(fn)
+    if string.find(string.lower(s), "hook") or string.find(string.lower(s), "detour") then return true end
+    return false
+end
+
+rawset(_G, "loadstring", function(str, ...)
+    if is_hooked(orig_loadstring) then
+        return
+    end
+    return orig_loadstring(str, ...)
+end)
+
+local nigger = "roblox"
+print(nigger)
