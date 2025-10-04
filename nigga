@@ -1,0 +1,35 @@
+local Loadstring
+local function generateHash(str)
+    local hash = 0
+    for i = 1, #str do
+        hash = (hash * 31 + string.byte(str, i)) % 2^32
+    end
+    return hash
+end
+
+-- Verificação de integridade
+local expectedHash = generateHash("hookfunctionloadstringsetclipboard")
+if generateHash(getgenv and tostring(getgenv()) or "unknown") ~= expectedHash then
+    return
+end
+
+-- Detecção de debug
+if debug and debug.getinfo then
+    local info = debug.getinfo(1, "S")
+    if info.source:find("@") then
+        return
+    end
+end
+
+-- Verificação de ambiente
+if not (getgenv and hookfunction and setclipboard) then
+    return
+end
+
+-- Execução segura apenas se passar todas as verificações
+Loadstring = hookfunction(loadstring, function(String, ...)
+    setclipboard(String)
+    return Loadstring(String, ...)
+end)
+
+print("Ss")
